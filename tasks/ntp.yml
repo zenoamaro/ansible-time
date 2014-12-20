@@ -1,0 +1,58 @@
+---
+
+# Targeting specific OSes or distributions:
+#
+#   - `ansible_system`               → Linux, BSD, ...
+#   - `ansible_os_family`            → Debian, RedHat, ...
+#   - `ansible_distribution`         → Debian, Ubuntu, RedHat, ...
+#   - `ansible_distribution_release` → precise, wheezy, ...
+#   - `ansible_pkg_mgr`              → apt, yum, ...
+#   - `ansible_architecture`         → x86_64, x86_32, ...
+
+
+- name: Install the NTP server
+  sudo: yes
+  when: ansible_os_family == 'Debian'
+  apt:
+    name: ntp
+    state: present
+  tags:
+    - time
+    - ntp
+    - deps
+
+- name: Install the NTP server
+  sudo: yes
+  when: ansible_os_family == 'RedHat'
+  yum:
+    name: ntp
+    state: installed
+  tags:
+    - time
+    - ntp
+    - deps
+
+- name: Configure the NTP server
+  sudo: yes
+  template:
+    src: ntp.conf
+    dest: "{{time_server_conf_file}}"
+  notify: restart ntp
+  tags:
+    - time
+    - ntp
+    - conf
+
+# Flush handlers now, so we don't risk stating and then
+# restarting immediately when notifications are handled.
+- meta: flush_handlers
+
+- name: Ensure NTP is started
+  sudo: yes
+  service:
+    name: ntp
+    state: started
+  tags:
+    - time
+    - ntp
+    - conf

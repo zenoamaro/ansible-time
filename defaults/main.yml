@@ -1,0 +1,423 @@
+---
+
+timezone: UTC
+timezone_conf_file: /etc/timezone
+
+
+# Servers and peers
+# -----------------
+
+# Configuration for ntpd; see ntp.conf(5) for help
+# http://www.eecis.udel.edu/~mills/ntp/html
+
+# All following definitions accept these options in addition to
+# the address:
+#
+# autokey
+# : All packets sent to and received from the server or peer are
+#   to include authentication fields encrypted using the autokey
+#   scheme described in Authentication Commands.
+#
+# burst
+# : when the server is reachable, send a burst of eight packets
+#   instead of the usual one. The packet spacing is normally 2
+#   s; however, the spacing between the first and second packets
+#   can be changed with the calldelay command to allow
+#   additional time for a modem or ISDN call to complete. This
+#   is designed to improve timekeeping quality with the server
+#   command and s addresses.
+#
+# iburst
+# : When the server is unreachable, send a burst of eight
+#   packets instead of the usual one. The packet spacing is
+#   normally 2s; however, the spacing between the first two
+#   packets can be changed with the calldelay command to allow
+#   additional time for a modem or ISDN call to complete. This
+#   is designed to speed the initial synchronization acquisition
+#   with the server command and s addresses and when ntpd(8)  is
+#   started with the -q option.
+#
+# key
+# : All packets sent to and received from the server or peer are
+#   to include authentication fields encrypted using the
+#   specified key identifier with values from 1 to 65534,
+#   inclusive. The default is to include no encryption field.
+#
+# minpoll <minpoll> maxpoll <maxpoll>
+# : These options specify the minimum and maximum poll intervals
+#   for NTP messages, as a power of 2 in seconds. The maximum
+#   poll interval defaults to 10 (1,024s), but can be increased
+#   by the maxpoll option to an upper limit of 17 (36.4 h). The
+#   minimum poll interval defaults to 6 (64s), but can be
+#   decreased by the minpoll option to a lower limit of 4 (16
+#   s).
+#
+# noselect
+# : Marks the server as unused, except for display purposes. The
+#   server is discarded by the selection algorithm.
+#
+# prefer
+# : Marks the server as preferred. All other things being equal,
+#   this host will be chosen for synchronization among a set of
+#   correctly operating hosts. See the "Mitigation Rules and the
+#   prefer Keyword" page (available as part of the HTML
+#   documentation provided in /usr/share/doc/ntp) for further
+#   information.
+#
+# ttl <ttl>
+# : This option is used only with broadcast server and manycast
+#   client modes. It specifies the time-to-live ttl to use on
+#   broadcast server and multicast server and the maximum ttl
+#   for the expanding ring search with manycast client packets.
+#   Selection of the proper value, which defaults to 127, is
+#   something of a black art and should be coordinated with the
+#   network administrator.
+#
+# version <version>
+# : Specifies the version number to be used for outgoing NTP
+#   packets. Versions 1-4 are the choices, with version 4 the
+#   default.
+
+# For type s and r addresses, this command mobilizes a
+# persistent client mode association with the specified remote
+# server or local radio clock. In this mode the local clock can
+# synchronized to the remote server, but the remote server can
+# never be synchronized to the local clock. This command should
+# not be used for type b or m addresses.
+time_servers:
+  - 0.ubuntu.pool.ntp.org
+  - 1.ubuntu.pool.ntp.org
+  - 2.ubuntu.pool.ntp.org
+  - 3.ubuntu.pool.ntp.org
+  - ntp.ubuntu.com
+
+# For type s addresses (only), this command mobilizes a
+# persistent symmetric-active mode association with the
+# specified remote peer. In this mode the local clock can be
+# synchronized to the remote peer or the remote peer can be
+# synchronized to the local clock. This is useful in a network
+# of servers where, depending on various failure scenarios,
+# either the local or remote peer may be the better source of
+# time. This command should NOT be used for type b, m or r
+# addresses.
+time_peers:
+  # - 192.168.123.255
+
+# For type m addresses (only), this command mobilizes a manycast
+# client mode association for the multicast address specified.
+# In this case a specific address must be supplied which matches
+# the address used on the manycastserver command for the
+# designated manycast servers. The NTP multicast address
+# 224.0.1.1 assigned by the IANA should NOT be used, unless
+# specific means are taken to avoid spraying large areas of the
+# Internet with these messages and causing a possibly massive
+# implosion of replies at the sender. The manycastserver command
+# specifies that the local server is to operate in client mode
+# with the remote servers that are discovered as the result of
+# broadcast/multicast messages. The client broadcasts a request
+# message to the group address associated with the specified
+# address and specifically enabled servers respond to these
+# messages. The client selects the servers providing the best
+# time and continues as with the server command. The remaining
+# servers are discarded as if never heard.
+time_manycasts:
+  - 192.168.123.255
+
+# For type b and m addresses (only), this command mobilizes a
+# persistent broadcast mode association. Multiple commands can
+# be used to specify multiple local broadcast interfaces
+# (subnets) and/or multiple multicast groups. Note that local
+# broadcast messages go only to the interface associated with
+# the subnet specified, but multicast messages go to all
+# interfaces. In broadcast mode the local server sends periodic
+# broadcast messages to a client population at the address
+# specified, which is usually the broadcast address on (one of)
+# the local network(s) or a multicast address assigned to NTP.
+# The IANA has assigned the multicast group address IPv4
+# 224.0.1.1 and IPv6 ff05::101 (site local) exclusively to NTP,
+# but other nonconflicting addresses can be used to contain the
+# messages within administrative boundaries. Ordinarily, this
+# specification applies only to the local server operating as a
+# sender; for operation as a broadcast client, see the
+# broadcastclient or multicastclient commands below.
+#
+time_broadcasts:
+  # - 192.168.123.255
+
+
+# Access control and authentication
+# ---------------------------------
+
+# The address argument expressed in dotted-quad form is the
+# address of a host or network. Alternatively, the address
+# argument can be a valid host DNS name. The mask argument
+# expressed in dottedquad form defaults to 255.255.255.255,
+# meaning that the address is treated as the address of an
+# individual host. A default entry (address 0.0.0.0, mask
+# 0.0.0.0) is always included and is always the first entry in
+# the list. Note that text string default, with no mask option,
+# may be used to indicate the default entry. In the current
+# implementation, flag always restricts access, i.e., an entry
+# with no flags indicates that free access to the server is to
+# be given. The flags are not orthogonal, in that more
+# restrictive flags will often make less restrictive ones
+# redundant. The flags can generally be classed into two
+# categories, those which restrict time service and those which
+# restrict informational queries and attempts to do run-time
+# reconfiguration of the server.
+#
+# One or more of the following flags may be specified:
+#
+# ignore
+# : Deny packets of all kinds,  including ntpq(8) and ntpdc(8)
+#   queries.
+#
+# kod
+# : If this flag is set when an access violation occurs, a
+#   kiss-o'-death (KoD) packet is sent. KoD packets are rate
+#   limited to no more than one per second. If another KoD
+#   packet occurs within one second after the last one, the
+#   packet is dropped.
+#
+# limited
+# : Deny service if the packet spacing violates the lower limits
+#   specified in the discard command. A history of clients is
+#   kept using the monitoring capability of ntpd(8). Thus,
+#   monitoring is always active as long as there is a
+#   restriction entry with the limited flag.
+#
+# lowpriotrap
+# : Declare traps set by matching hosts to be low priority. The
+#   number of traps a server can maintain is limited (the
+#   current limit is 3). Traps are usually assigned on a first
+#   come, first served basis, with later trap requestors being
+#   denied service. This flag modifies the assignment algorithm
+#   by allowing low priority traps to be overridden by later
+#   requests for normal priority traps.
+#
+# nomodify
+# : Deny ntpq(8) and ntpdc(8) queries which attempt to modify
+#   the state of the server (i.e., run time reconfiguration).
+#   Queries which return information are permitted.
+#
+# noquery
+# : Deny ntpq(8) and ntpdc(8) queries. Time service is not
+#   affected.
+#
+# nopeer
+# : Deny packets which would result in mobilizing a new asso-
+#   ciation. This includes broadcast and symmetric active
+#   packets when a configured association does not exist.
+#
+# noserve
+# : Deny all packets except ntpq(8) and ntpdc(8) queries.
+#
+# notrap
+# : Decline to provide mode 6 control message trap service to
+#   matching hosts. The trap service is a subsystem of the ntpdq
+#   control message protocol which is intended for use by remote
+#   event logging programs.
+#
+# notrust
+# : Deny service unless the packet is cryptographically
+#   authenticated.
+#
+# ntpport
+# : This is actually a match algorithm modifier, rather than a
+#   restriction flag. Its presence causes the restriction entry
+#   to be matched only if the source port in the packet is the
+#   standard NTP UDP port (123). Both ntpport and non-ntpport
+#   may be specified. The ntpport is considered more specific
+#   and is sorted later in the list.
+#
+# version
+# : Deny packets that do not match the current NTP version.
+#
+time_restrict:
+  # By default, exchange time with everybody, but don't allow
+  # configuration.
+  - -4 default kod notrap nomodify nopeer noquery
+  - -6 default kod notrap nomodify nopeer noquery
+  # Local users may interrogate the ntp server more closely.
+  - 127.0.0.1
+  - ::1
+
+# Set the parameters of the rate control facility which protects
+# the server from client abuse. If the limited flag is present
+# in the ACL, packets that violate these limits are discarded.
+# If, in addition, the kod flag is present, a kiss-o'-death
+# packet is returned.
+
+# Specify the minimum average interpacket spacing (minimum
+# average headway time) in log2 seconds.
+time_discard_minimum: 2
+
+# Specify the minimum interpacket spacing (guard time) in
+# seconds.
+time_discard_average: 5
+
+# Enables the server to synchronize with unconfigured peers only
+# if the peer has been correctly authenticated using either
+# public key or private key cryptography.
+time_authenticate: yes
+
+# Specifies the key identifier to use with the ntpq(8) utility,
+# which uses the standard protocol defined in RFC-1305. The key
+# argument is the key identifier for a trusted key, where the
+# value can be in the range 1 to 65,534, inclusive.
+time_key_control: 1
+
+# This command requires the OpenSSL library. It activates public
+# key cryptography, selects the message digest and signature
+# encryption scheme and loads the required private and public
+# values described above. If one or more files are left
+# unspecified, the default names are used as described above.
+# Unless the complete path and name of the file are specified,
+# the location of a file is relative to the keys directory
+# specified in the keysdir command or default  /usr/local/etc.
+#
+# Specifies the location of the required host public certificate
+# file. This overrides the link ntpkey_cert_hostname in the keys
+# directory.
+time_crypto_cert_file:
+
+# Specifies the location of the optional GQ parameters file.
+# This overrides the link ntpkey_gq_hostname in the keys
+# directory.
+time_crypto_gqpar_file:
+
+# Specifies the location of the required host key file. This
+# overrides the link ntpkey_key_hostname in the keys directory.
+time_crypto_host_file:
+
+# Specifies the location of the optional IFF parameters
+# file.This overrides the link ntpkey_iff_hostname in the keys
+# directory.
+time_crypto_iffpar_file:
+
+# Specifies the location of the optional leapsecond file. This
+# overrides the link ntpkey_leap in the keys directory.
+time_crypto_leap_file:
+
+# Specifies the location of the optional MV parameters file.
+# This overrides the link ntpkey_mv_hostname in the keys
+# directory.
+time_crypto_mvpar_file:
+
+# Specifies the password to decrypt files containing private
+# keys and identity parameters. This is required only if these
+# files have been encrypted.
+time_crypto_password:
+
+# Specifies the location of the random seed file used by the
+# OpenSSL library. The defaults are described in the main text
+# above.
+time_crypto_rand_file:
+
+# Specifies the location of the optional sign key file. This
+# overrides the link ntpkey_sign_hostname in the keys directory.
+# If this file is not found, the host key is also the sign key.
+time_crypto_sign_file:
+
+# This command specifies the default directory path for
+# cryptographic keys, parameters and certificates.
+time_crypto_keys_dir: /usr/local/etc/
+
+# Specifies the complete path and location of the MD5 key file
+# containing the keys and key identifiers used by ntpd(8),
+# ntpq(8) and ntpdc when operating with symmetric key
+# cryptography. This is the same operation as the -k command
+# line option.
+time_crypto_keys_file: keyfile
+
+# Specifies the key identifier to use with the ntpdc(8) utility
+# program, which uses a proprietary protocol specific to this
+# implementation of ntpd(8). The key argument is a key
+# identifier for the trusted key, where the value can be in the
+# range 1 to 65,534, inclusive.
+time_crypto_request_key: 1
+
+# Specifies the interval between re-randomization of certain
+# cryptographic values used by the Autokey scheme, as a power of
+# 2 in seconds. These values need to be updated frequently in
+# order to deflect brute-force attacks on the algorithms of the
+# scheme; however, updating some values is a relatively
+# expensive operation. The default interval is 16  (65,536 s or
+# about 18 hours). For poll intervals above the specified
+# interval, the values will be updated for every message sent.
+time_crypto_revoke_interval: 16
+
+# Specifies the key identifiers which are trusted for the
+# purposes of authenticating peers with symmetric key
+# cryptography, as well as keys used by the ntpq(8) and ntpdc(8)
+# programs. The authentication procedures require that both the
+# local and remote servers share the same key and key identifier
+# for this purpose, although different keys can be used with
+# different servers. The key arguments are 32-bit unsigned
+# integers with values from 1 to 65,534.
+time_crypto_trusted_keys:
+  # - key
+  # - key
+
+
+# Options
+# -------
+
+time_server_conf_file: /etc/ntp.conf
+
+# This command specifies the complete path and name of the file
+# used to record the frequency of the local clock oscillator.
+# This is the same operation as the -f command line option.  If
+# the file exists, it is read at startup in order to set the
+# initial frequency and then updated once per hour with the
+# current frequency computed by the daemon.  If the file name is
+# specified, but the file itself does not exist, the starts with
+# an initial frequency of zero and creates the file when writing
+# it for the first time. If this command is not given, the
+# daemon will always start with an initial frequency of zero.
+#
+# The file format consists of a single line containing a single
+# floating point number, which records the frequency offset
+# measured in parts-per-million  (PPM).  The file is updated by
+# first writing the current drift value into a temporary file
+# and then renaming this file to replace the old version.  This
+# implies that ntpd(8) must have write permission for the
+# directory the drift file is located in, and that file system
+# links, symbolic or otherwise, should be avoided.
+time_drift_file: /var/lib/ntp/ntp.drift
+
+# Enables the calibrate feature for reference clocks.
+time_calibrate: no
+
+# Enables the kernel time discipline, if available.
+time_kernel_discipline: yes
+
+# Enables time and frequency discipline. In effect, this switch
+# opens and closes the feedback loop, which is useful for
+# testing.
+time_frequency_discipline: yes
+
+
+# Monitoring
+# ----------
+
+# Enables the monitoring facility. See the ntpdc(8) program and
+# the monlist command or further information.
+time_monitoring: yes
+
+# Enables the statistics facility.
+time_stats_sources:
+  - loopstats
+  - peerstats
+  - clockstats
+
+time_stats_dir: /var/log/ntpstats/
+
+# This command controls the amount and type of output written to
+# the system syslog(3) facility or the alternate log file.
+time_log_sources:
+  - +sysall
+  - +syncall
+
+# "syslog" or "path/to/file"
+time_log_destination: syslog

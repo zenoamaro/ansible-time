@@ -1,0 +1,24 @@
+---
+
+- name: Setting the timezone
+  sudo: yes
+  template:
+    src: timezone
+    dest: "{{timezone_conf_file}}"
+  tags:
+    - time
+    - conf
+
+- name: Reconfiguring timezone data
+  sudo: yes
+  command: dpkg-reconfigure --frontend noninteractive tzdata
+  when: ansible_os_family == 'Debian'
+  tags:
+    - time
+    - conf
+
+- name: Synchronizing time
+  sudo: yes
+  command: "ntpdate -u {{time_servers|random}}"
+  tags:
+    - time
