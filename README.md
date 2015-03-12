@@ -10,10 +10,10 @@ Vagrant machines are provided to produce a boxed install of NTP or a VM for inte
 Supports
 --------
 Supported targets:
-
-- Ubuntu 14.04 "Trusty Tahr"
-- Ubuntu 12.04 "Precise Pangolin"
-- ...
+- Ubuntu 14.04 LTS "Trusty Tahr"
+- Ubuntu 12.04 LTS "Precise Pangolin"
+- Debian (untested)
+- RedHat (untested)
 
 
 Usage
@@ -43,7 +43,7 @@ To provision a standalone NTP box, start the `boxed` VM, which is a Ubuntu 14.04
 
     $ vagrant up boxed
 
-You will find Time listening on the VM's `$port` port on address `192.168.33.20` in the private network. You can then connect to it as any user. Please note that this is highly insecure, so if you're going to publish this VM you'll want to provide actual authentication.
+You will find Time listening on the VM's port `123` on address `192.168.33.20` in the private network. You can then connect to it as any user. Please note that this is highly insecure, so if you're going to publish this VM you'll want to provide actual authentication.
 
 Run the tests by provisioning the appropriate VM:
 
@@ -65,6 +65,10 @@ Still to do
 
 Changelog
 ---------
+### 0.1.1
+- The package list is not being updated in playbooks anymore.
+- VMs are not autostarted anymore.
+- Updated inventory to use the new Vagrant private keys.
 
 ### 0.1
 Initial version.
@@ -74,7 +78,7 @@ License
 -------
 The MIT License (MIT)
 
-Copyright (c) 2014, zenoamaro <zenoamaro@gmail.com>
+Copyright (c) 2015, zenoamaro <zenoamaro@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
