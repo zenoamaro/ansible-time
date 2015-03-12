@@ -10,6 +10,17 @@
 #   - `ansible_architecture`         → x86_64, x86_32, ...
 
 
+- name: Update the packages list
+  sudo: yes
+  when: ansible_os_family == 'Debian'
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  tags:
+    - time
+    - ntp
+    - deps
+
 - name: Install the NTP server
   sudo: yes
   when: ansible_os_family == 'Debian'
